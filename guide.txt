@@ -1,0 +1,85 @@
+npm i pusher-js pusher next-auth @auth/prisma-adapter @prisma/client
+
+npm i -D prisma  ==> npx prisma init 
+
+SUPABASE ==> CRATE NEW PROJECT ==> COPY URI AND paste in .env/DATABASE_URL
+
+nextAuth ==> elige opcion adapaters // elige prisma y copia eschema  a partir de client
+
+pegalo en el esquema de prisma de tu proyecto 
+
+ejecuta npx prisma db push 
+
+GITHUB==>SETTING/DEVELOPER SETTING ==>GENERA UN CLIENTE ID Y UN SECRETO 
+GITHUB ==> EN AUTHROIZATION CALLBACK URL PEGA:
+http://localhost:3000/api/auth/callback/github
+
+COPIA Y PEGA EL CLIENTE ID Y E SECRETO EN VARIBALES DE ENTORNO en el archivo .env
+===============0
+
+CREA app/lib/auth.ts y db.ts : 
+en auth.ts pega :
+
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import type { NextAuthOptions } from "next-auth";
+import GithubProvider from "next-auth/providers/github"
+import { prisma } from "./db";
+
+export const authOptions:NextAuthOptions={
+    adapter:PrismaAdapter(prisma),
+    providers:[
+        GithubProvider({
+            clientId:process.env.GITHUB_CLIENT_ID as string,
+            clientSecret:process.env.GITHUB_CLIENT_SECRET as string
+        })
+    ]
+}
+
+en DB.ts pega lo siguiente:
+
+import { PrismaClient } from "@prisma/client";
+
+const globalForPrisma=globalThis as unknown as {
+    prisma:PrismaClient | undefined
+}
+
+export const prisma=globalForPrisma.prisma ??  new PrismaClient();
+
+if(process.env.NODE_ENV !== "production") globalForPrisma.prisma=prisma
+
+=====
+
+dentro de app crea la siguiente ruta app/api/auth/[...nextauth]/route.ts
+
+dentro de route.ts pega: 
+
+import NextAuth from "next-auth/next";
+import { authOptions } from "@/app/lib/auth";
+
+const handler=NextAuth(authOptions)
+
+export {handler as GET, handler as POST}
+
+dentro de app crea la siguiente ruta app/components/Providers.tsx:
+
+ "use client"
+import { SessionProvider } from "next-auth/react"
+import type { ReactNode } from "react"
+
+export const NextAuthProvider=({children}:{children:ReactNode})=>{
+    return (
+        <SessionProvider>
+            {children}
+        </SessionProvider>
+    )
+}
+
+===
+EN LAYOUT.TSX ENVUELVE LOS CHILDREN CON EL COMPONENTE NEXTAUTHPROVIDER
+
+===
+EN LA TERMINAL GENERA UNA CLAVE ALEATORIA CON openssl rand -base64 32
+COPIALA Y PEGALA EN .ENV EN UNA VARIBALE LLAMADA 
+
+NEXTAUTH_SECRET=<KEY>
+
