@@ -29,7 +29,7 @@ import ChatComponent from '../components/Chat'
 //Add
 export const dynamic="force-dynamic";
 
-export const ChatHomePage = async() => {
+export default async function ChatHomePage(){
     const session=await getServerSession(authOptions)
     if(!session ){
         redirect("/")
@@ -44,4 +44,3 @@ export const ChatHomePage = async() => {
         </div>
     )
 }
-export default ChatHomePage
