@@ -26,6 +26,7 @@ export async function getData(){
     
 }
 
+//Add
 export const dynamic="force-dynamic";
 
 export const ChatHomePage = async() => {
