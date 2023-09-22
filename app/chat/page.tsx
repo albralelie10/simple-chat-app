@@ -6,7 +6,7 @@ import FormChat from '../components/Form'
 import { prisma } from '../lib/db'
 import ChatComponent from '../components/Chat'
 
-export async function getData(){
+ async function getData(){
     return await prisma.message.findMany({
         select:{
             content:true,
